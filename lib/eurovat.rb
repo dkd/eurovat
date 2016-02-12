@@ -1,9 +1,5 @@
 require 'thread'
-begin
-  require 'soap/wsdlDriver'
-rescue LoadError
-  require 'savon'
-end
+require 'savon'
 
 class Eurovat
   SERVICE_URL = 'http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl'.freeze
@@ -80,11 +76,7 @@ class Eurovat
   def initialize
     @country = @@country
     @mutex   = Mutex.new
-    if defined?(SOAP)
-      @driver = SOAP::WSDLDriverFactory.new(SERVICE_URL).create_rpc_driver
-    else
-      @driver = Savon::Client.new(SERVICE_URL)
-    end
+    @driver = Savon::Client.new(wsdl: SERVICE_URL)
   end
 
   # Any exception other than InvalidFormatError indicates that the service is down.
@@ -93,37 +85,15 @@ class Eurovat
     if vat_number =~ VAT_FORMAT
       country_code = $1
       number = $2
-      if @driver.respond_to?(:checkVat)
-        @mutex.synchronize do
-          begin
-            result = @driver.checkVat(
-              :countryCode => country_code,
-              :vatNumber => number)
-            result.valid == "true"
-          rescue SOAP::FaultError => e
-            if e.message == "INVALID_INPUT"
-              raise InvalidFormatError, "#{vat_number.inspect} is not formatted like a valid VAT number"
-            else
-              raise e
-            end
-          end
-        end
-      else
-        @mutex.synchronize do
-          begin
-            result = @driver.request(:checkVat) do
-              soap.body = {
-                :countryCode => country_code,
-                :vatNumber => number
-              }
-            end
-            result[:check_vat_response][:valid]
-          rescue Savon::SOAP::Fault => e
-            if e.message =~ /INVALID_INPUT/
-              raise InvalidFormatError, "#{vat_number.inspect} is not formatted like a valid VAT number"
-            else
-              raise e
-            end
+      @mutex.synchronize do
+        begin
+          result = @driver.call(:check_vat, message: {countryCode: country_code, vatNumber: number})
+          result.body[:check_vat_response][:valid]
+        rescue Savon::SOAPFault => e
+          if e.message =~ /INVALID_INPUT/
+            raise InvalidFormatError, "#{vat_number.inspect} is not formatted like a valid VAT number"
+          else
+            raise e
           end
         end
       end

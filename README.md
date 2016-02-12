@@ -2,12 +2,10 @@
 
 This library aids in checking whether one should charge a customer Value Added Tax (based on your and his country information and whether he has provided a VAT number) and in checking whether a VAT number is correct. It uses the European Union's VAT number checking SOAP service.
 
-On Ruby 1.8, it uses the builtin SOAP library. On Ruby 1.9, it requires the `savon` gem. We do not specify Savon as a dependency so you'll have to do it yourself.
-
 When using Rails, add this to your Gemfile:
 
     gem 'eurovat'
-    gem 'savon', :platforms => :ruby_19
+    gem 'savon'
 
 ## Cryptographic verification
 
@@ -28,7 +26,7 @@ Setup your company's own country first. This value defaults to 'Netherlands'. It
 
     # Customer is a consumer from the Netherlands (no VAT number). Must we charge VAT?
     Eurovat.must_charge_vat?('Netherlands', nil)     => true
-    
+
     # Customer is a business from the Netherlands. Must we charge VAT?
     Eurovat.must_charge_vat?('Netherlands', 'NL8192.25.642.B01')   => false
 
@@ -38,10 +36,10 @@ Setup your company's own country first. This value defaults to 'Netherlands'. It
 Use `Eurovat#check_vat_number` to check whether a VAT number is correct. This method contacts the [European Union VAT checking service](http://ec.europa.eu/taxation_customs/vies/) and returns true if the VAT number is valid and false if it isn't. If the VAT number doesn't even look like one, then it will raise `Eurovat::InvalidFormatError`. Any exception other than `Eurovat::InvalidFormatError` indicates that the service is down.
 
     eurovat = Eurovat.new
-    eurovat.check_vat_number('NL819225642B01')   => true
+    eurovat.check_vat_number('NL855263180B01')   => true
     eurovat.check_vat_number('NL010101010B99')   => false
     # It automatically strips away spaces and dots:
-    eurovat.check_vat_number('NL8192.25.642.B01')   => true
+    eurovat.check_vat_number('NL8552.63.180.B01')   => true
 
 ## About the EU VAT checking service's uptime
 
