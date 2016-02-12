@@ -1,7 +1,7 @@
 require File.expand_path('lib/eurovat/version')
 
 Gem::Specification.new do |s|
-	s.name = "dkd-eurovat"
+	s.name = "eurovat"
 	s.version = Eurovat::VERSION_STRING
   s.licenses = ['MIT']
 	s.summary = "European Union VAT number utilities"
