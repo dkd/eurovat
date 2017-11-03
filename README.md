@@ -5,7 +5,6 @@ This library aids in checking whether one should charge a customer Value Added T
 When using Rails, add this to your Gemfile:
 
     gem 'eurovat'
-    gem 'savon'
 
 ## Cryptographic verification
 
