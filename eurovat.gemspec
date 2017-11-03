@@ -16,4 +16,6 @@ Gem::Specification.new do |s|
 		"lib/**/*",
 		"test/*"
 	]
+
+	s.add_dependency 'savon', '~> 2.11.2'
 end
